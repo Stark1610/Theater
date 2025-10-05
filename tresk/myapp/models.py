@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 class Galery(models.Model):
     photo = models.ImageField(upload_to="galery/")
+    name = models.CharField( max_length=50)
 
     def __str__(self):
         return f'{self.id}'
