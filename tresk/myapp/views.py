@@ -1,9 +1,16 @@
-from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
-from .serializers import GalerySerializer, ShowSerializer
-from .models import Galery, Show
+from .serializers import (
+    GalerySerializer,
+    ShowSerializer,
+    TicketSerializer,
+    TicketListSerializer,
+)
+from .models import Galery, Show, Ticket
 from django.utils import timezone
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 
 class GaleryViewSet(ModelViewSet):
     queryset = Galery.objects.all()
@@ -14,8 +21,31 @@ class ShowViewSet(ModelViewSet):
 
     def get_queryset(self):
         return Show.objects.filter(start_at__gte = timezone.now()).order_by("start_at")
-    
+
 
 class ShowViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Show.objects.all()
     serializer_class = ShowSerializer
+
+
+class TicketViewSet(ModelViewSet):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+
+
+class TicketBatchCreateView(APIView):
+    """
+    POST /api/tickets/buy/
+    {
+      "tickets": [
+        {"type_id": 1, "row": 1, "place": 1},
+        {"type_id": 1, "row": 1, "place": 2}
+      ]
+    }
+    """
+
+    def post(self, request):
+        serializer = TicketListSerializer(data=request.data.get("tickets", []))
+        serializer.is_valid(raise_exception=True)
+        tickets = serializer.save()
+        return Response({"created": len(tickets)}, status=status.HTTP_201_CREATED)
