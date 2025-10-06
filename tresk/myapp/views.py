@@ -68,13 +68,12 @@ class LoginViewSet(views.APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-        if not email or not password:
-            return Response({"errors":"Почта или пароль не введены!"}, status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.filter(email=email).first()
         if not user:
             return Response({"errors": "Пользователь не найден!"}, status=status.HTTP_400_BAD_REQUEST)
-
         user = authenticate(username=user.username, password=password)
+        if not user:
+            return Response({"errors":"Почта или пароль не введены!"}, status=status.HTTP_400_BAD_REQUEST)
         Token.objects.filter(user=user).delete()
         token = Token.objects.create(user=user)
         return Response({"token":token.key, "user":{"id":user.id, "first_name":user.first_name, "last_name":user.last_name, "email":user.email}}, status=status.HTTP_200_OK)
