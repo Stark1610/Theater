@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import GaleryViewSet, ShowViewSet, TicketViewSet, TicketBatchCreateView,RegisterViewsSet
+from .views import GaleryViewSet, ShowsViewSet, ShowViewSet, TicketViewSet, TicketBatchCreateView,RegisterViewsSet
 
 router = DefaultRouter()
 router.register(r'gallery', GaleryViewSet, basename='gallery')
-router.register(r'show', ShowViewSet, basename='show')
-router.register(r'shows', ShowViewSet, basename='shows')
+router.register(r'events', ShowViewSet, basename='events')
+router.register(r'shows', ShowsViewSet, basename='shows')
 router.register(r'tickets', TicketViewSet, basename='tickets')
 
 urlpatterns = [

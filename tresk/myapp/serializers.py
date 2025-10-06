@@ -14,13 +14,13 @@ class GalerySerializer(serializers.ModelSerializer):
 class ShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Show
-        fields = ['id','title', 'description', 'photo', 'start_at', 'end_at', 'places']
+        fields = ['id','title', 'description', 'photo', 'start_at', 'end_at']
 
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ["type", "row", "place"]
+        fields = ["type_ticket", "row", "place"]
 
 
 class TypeTicketSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class TypeTicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TypeTicket
-        fields = ['id', 'type', 'price', 'rows', 'seats_in_rows', 'capacity', 'seats']
+        fields = ['id', 'type_ticket', 'price', 'rows', 'seats_in_rows', 'capacity', 'seats']
 
     def get_seats(self, obj):
         tickets = Ticket.objects.filter(type=obj)
@@ -48,7 +48,7 @@ class TypeTicketSerializer(serializers.ModelSerializer):
         return seats
 
 
-class ShowSerializer(serializers.ModelSerializer):
+class ShowsSerializer(serializers.ModelSerializer):
     types = TypeTicketSerializer(many=True, read_only=True)
 
     class Meta:

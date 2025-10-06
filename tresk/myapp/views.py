@@ -2,6 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from .serializers import (
     GalerySerializer,
     ShowSerializer,
+    ShowsSerializer,
     TicketSerializer,
     TicketListSerializer,
     RegisterUserSerializer
@@ -27,9 +28,9 @@ class ShowViewSet(ModelViewSet):
         return Show.objects.filter(start_at__gte = timezone.now()).order_by("start_at")
 
 
-class ShowViewSet(viewsets.ReadOnlyModelViewSet):
+class ShowsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Show.objects.all()
-    serializer_class = ShowSerializer
+    serializer_class = ShowsSerializer
 
 
 class TicketViewSet(ModelViewSet):
