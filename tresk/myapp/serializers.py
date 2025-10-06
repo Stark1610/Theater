@@ -3,6 +3,7 @@ from .models import Show, TypeTicket, Ticket, Galery
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from rest_framework.validators import UniqueValidator
 
 User = get_user_model()
 
@@ -14,7 +15,7 @@ class GalerySerializer(serializers.ModelSerializer):
 class ShowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Show
-        fields = ['id','title', 'description', 'photo', 'start_at', 'end_at']
+        fields = ['id','title', 'description', 'photo', 'start_at', 'end_at', 'city', 'adress']
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -32,7 +33,7 @@ class TypeTicketSerializer(serializers.ModelSerializer):
         fields = ['id', 'type_ticket', 'price', 'rows', 'seats_in_rows', 'capacity', 'seats']
 
     def get_seats(self, obj):
-        tickets = Ticket.objects.filter(type=obj)
+        tickets = Ticket.objects.filter(type_ticket=obj)
         booked = {(t.row, t.place) for t in tickets}
 
         seats = []
@@ -109,10 +110,13 @@ class TicketListSerializer(serializers.ListSerializer):
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
 
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "email", "password"]
+        fields = ["id", "first_name", "last_name", "email", "password"]
 
     def validate_password(self, value):
         validate_password(value)
@@ -120,7 +124,11 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     
     def create(self, validated_date):
         password = validated_date.pop("password")
-        user = User(**validated_date)
+        first_name = validated_date.get("first_name")
+        last_name = validated_date.get("last_name")
+        username = f"{first_name}_{last_name}"
+        user = User(username=username, **validated_date)
         user.set_password(password)
         user.save()
         return user
+

@@ -13,7 +13,9 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from rest_framework import permissions, generics
+from rest_framework import permissions, generics, views
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
@@ -60,3 +62,26 @@ class RegisterViewsSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterUserSerializer
     permission_classes = [permissions.AllowAny]
+
+class LoginViewSet(views.APIView):
+    permission_classes = [permissions.AllowAny]
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+        if not email or not password:
+            return Response({"errors":"Почта или пароль не введены!"}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({"errors": "Пользователь не найден!"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(username=user.username, password=password)
+        Token.objects.filter(user=user).delete()
+        token = Token.objects.create(user=user)
+        return Response({"token":token.key, "user":{"id":user.id, "first_name":user.first_name, "last_name":user.last_name, "email":user.email}}, status=status.HTTP_200_OK)
+
+class LogoutViewSet(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
