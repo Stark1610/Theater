@@ -2,13 +2,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
-
 class Galery(models.Model):
     photo = models.ImageField(upload_to="galery/")
     name = models.CharField( max_length=50, blank=True, null=True) # убрать blank и null
 
     def __str__(self):
         return f'{self.id}'
+
 
 class Show(models.Model):
     title = models.CharField(_('title'), max_length=30, unique=True)
@@ -40,7 +40,18 @@ class TypeTicket(models.Model):
         return self.rows * self.seats_in_rows
 
 
+class Order(models.Model):
+    full_name = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f'Заказ({self.id}) - {self.email}'
+
+
 class Ticket(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
     type_ticket = models.ForeignKey(TypeTicket, on_delete=models.CASCADE, related_name='tickets')
     row = models.PositiveIntegerField()
     place = models.PositiveIntegerField()
