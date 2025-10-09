@@ -1,9 +1,10 @@
 from rest_framework import serializers
-from .models import Show, TypeTicket, Ticket, Galery, Order
+from .models import Show, TypeTicket, Ticket, Gallery, Order
 from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
+from random import randint
 
 User = get_user_model()
 
@@ -35,7 +36,7 @@ class ItemTicketSerializer(serializers.Serializer):
 
 
 class OrderCreateSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(required=False)
     full_name = serializers.CharField(required=False, allow_blank=True)
     total_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     tickets = ItemTicketSerializer(many=True)
@@ -44,6 +45,10 @@ class OrderCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         tickets = validated_data.pop("tickets", [])
         total_price = validated_data.pop("total_price", None)
+        request = self.context["request"]
+        if request.user.is_authenticated:
+            validated_data["email"] = request.user.email
+            validated_data["full_name"] = request.user.username
         order = Order.objects.create(**validated_data)
         new_tickets = []
         for ticket in tickets:
@@ -73,11 +78,11 @@ class OrderCreateSerializer(serializers.Serializer):
 
 class GalerySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Galery
+        model = Gallery
         fields = ['id', 'photo']
 
 
-class ShowSerializer(serializers.ModelSerializer):
+class ShowsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Show
         fields = ['id','title', 'description', 'photo', 'start_at', 'end_at', 'city', 'adress']
@@ -109,7 +114,7 @@ class TypeTicketSerializer(serializers.ModelSerializer):
         return seats
 
 
-class ShowsSerializer(serializers.ModelSerializer):
+class EventsSerializer(serializers.ModelSerializer):
     types = TypeTicketSerializer(many=True, read_only=True)
 
     class Meta:
@@ -138,35 +143,35 @@ class TicketItemSerializer(serializers.ModelSerializer):
         return data
 
 
-class TicketListSerializer(serializers.ListSerializer):
-    child = TicketItemSerializer()
+# class TicketListSerializer(serializers.ListSerializer):
+#     child = TicketItemSerializer()
 
-    def create(self, validated_data):
-        created = []
-        conflicts = []
+#     def create(self, validated_data):
+#         created = []
+#         conflicts = []
 
-        with transaction.atomic():
-            for item in validated_data:
-                item.pop("type_id", None)
-                try:
-                    with transaction.atomic():
-                        created.append(Ticket.objects.create(**item))
-                except IntegrityError:
-                    conflicts.append(
-                        {
-                            "type": item["type"].id,
-                            "row": item["row"],
-                            "place": item["place"],
-                            "error": "Место уже занято",
-                        }
-                    )
+#         with transaction.atomic():
+#             for item in validated_data:
+#                 item.pop("type_id", None)
+#                 try:
+#                     with transaction.atomic():
+#                         created.append(Ticket.objects.create(**item))
+#                 except IntegrityError:
+#                     conflicts.append(
+#                         {
+#                             "type": item["type"].id,
+#                             "row": item["row"],
+#                             "place": item["place"],
+#                             "error": "Место уже занято",
+#                         }
+#                     )
 
-            if conflicts:
-                raise serializers.ValidationError(
-                    {"detail": "Некоторые места недоступны", "errors": conflicts}
-                )
+#             if conflicts:
+#                 raise serializers.ValidationError(
+#                     {"detail": "Некоторые места недоступны", "errors": conflicts}
+#                 )
 
-        return created
+#         return created
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -187,7 +192,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         password = validated_date.pop("password")
         first_name = validated_date.get("first_name", "first_name")
         last_name = validated_date.get("last_name", "last_name")
-        username = f"{first_name}_{last_name}"
+        username = f"{first_name}_{last_name}_{randint(1, 10000)}"
         user = User(username=username, **validated_date)
         user.set_password(password)
         user.save()

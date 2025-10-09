@@ -2,8 +2,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 
-class Galery(models.Model):
-    photo = models.ImageField(upload_to="galery/")
+class Gallery(models.Model):
+    photo = models.ImageField(upload_to="gallery/")
     name = models.CharField( max_length=50, blank=True, null=True) # убрать blank и null
 
     def __str__(self):
