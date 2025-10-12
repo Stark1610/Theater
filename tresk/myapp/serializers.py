@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 class ItemTicketSerializer(serializers.Serializer):
-    type_ticket = serializers.IntegerField()         # ID типа билета
+    type_ticket = serializers.IntegerField()
     row = serializers.IntegerField(min_value=1)
     place = serializers.IntegerField(min_value=1)
 
@@ -79,7 +79,7 @@ class OrderCreateSerializer(serializers.Serializer):
 class GalerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Gallery
-        fields = ['id', 'photo']
+        fields = ['id', 'photo', "name"]
 
 
 class ShowsSerializer(serializers.ModelSerializer):
@@ -122,58 +122,6 @@ class EventsSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'photo', 'start_at', 'end_at', 'types']
 
 
-class TicketItemSerializer(serializers.ModelSerializer):
-    type_id = serializers.IntegerField(write_only=True)
-
-    class Meta:
-        model = Ticket
-        fields = ["type_id", "row", "place"]
-
-    def validate(self, data):
-        tt = TypeTicket.objects.filter(id=data["type_id"]).first()
-        if not tt:
-            raise serializers.ValidationError({"type_id": "Такого типа билета нет"})
-        if data["row"] > tt.rows:
-            raise serializers.ValidationError({"row": f"Максимальный ряд {tt.rows}"})
-        if data["place"] > tt.seats_in_rows:
-            raise serializers.ValidationError(
-                {"place": f"Максимальное место {tt.seats_in_rows}"}
-            )
-        data["type"] = tt
-        return data
-
-
-# class TicketListSerializer(serializers.ListSerializer):
-#     child = TicketItemSerializer()
-
-#     def create(self, validated_data):
-#         created = []
-#         conflicts = []
-
-#         with transaction.atomic():
-#             for item in validated_data:
-#                 item.pop("type_id", None)
-#                 try:
-#                     with transaction.atomic():
-#                         created.append(Ticket.objects.create(**item))
-#                 except IntegrityError:
-#                     conflicts.append(
-#                         {
-#                             "type": item["type"].id,
-#                             "row": item["row"],
-#                             "place": item["place"],
-#                             "error": "Место уже занято",
-#                         }
-#                     )
-
-#             if conflicts:
-#                 raise serializers.ValidationError(
-#                     {"detail": "Некоторые места недоступны", "errors": conflicts}
-#                 )
-
-#         return created
-
-
 class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     first_name = serializers.CharField(required=True)
@@ -188,7 +136,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         validate_password(value)
         return value
     
-    def create(self, validated_date):                            #Транзакция автоматом от  Django 
+    def create(self, validated_date):
         password = validated_date.pop("password")
         first_name = validated_date.get("first_name", "first_name")
         last_name = validated_date.get("last_name", "last_name")
@@ -199,7 +147,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return user
 
 class TicketSerializer(serializers.ModelSerializer):
-    price = serializers.DecimalField(max_digits=5, decimal_places=2, source="type_ticket.price", read_only=True)    
+    price = serializers.DecimalField(max_digits=5, decimal_places=2, source="type_ticket.price", read_only=True)
     type_ticket = serializers.CharField(source="type_ticket.type_ticket", read_only=True)
 
     class Meta:
@@ -220,10 +168,8 @@ class OrderListSerializer(serializers.ModelSerializer):
         model = Order
         fields = ["full_name", "email", "title", "description", "photo", "start_at", "end_at", "city", "adress", "total_price", "tickets"]
 
-class OrderUserListSerializer(serializers.ModelSerializer):
-    orders = OrderListSerializer(many=True, read_only=True)
 
+class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Order
-        fields = ["full_name", "email", "orders"]
-
+        model = User
+        fields = ["username", "first_name", "last_name", "email"]

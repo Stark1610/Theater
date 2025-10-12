@@ -4,20 +4,20 @@ from django.core.exceptions import ValidationError
 
 class Gallery(models.Model):
     photo = models.ImageField(upload_to="gallery/")
-    name = models.CharField( max_length=50, blank=True, null=True) # убрать blank и null
+    name = models.CharField( max_length=50, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.id}'
+        return f'{self.name}'
 
 
 class Show(models.Model):
     title = models.CharField(_('title'), max_length=30, unique=True)
     description = models.TextField(_('description'))
-    photo = models.ImageField(upload_to="show/", blank=True, null=True) # убрать blank и null
+    photo = models.ImageField(upload_to="show/", blank=True, null=True)
     start_at = models.DateTimeField()
     end_at = models.TimeField()
-    city = models.CharField(max_length=20, blank=True, null=True) # убрать blank и null
-    adress = models.CharField(max_length=40, blank=True, null=True) # убрать blank и null
+    city = models.CharField(max_length=20, blank=True, null=True)
+    adress = models.CharField(max_length=40, blank=True, null=True)
     
     def __str__(self):
         return f'{self.title} {self.start_at.strftime("%d/%m/%Y, %H:%M:%S")}'

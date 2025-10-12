@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet 
-from .serializers import (GalerySerializer, ShowsSerializer, EventsSerializer, RegisterUserSerializer, OrderCreateSerializer, OrderListSerializer)
+from .serializers import (GalerySerializer, ShowsSerializer, EventsSerializer, RegisterUserSerializer, OrderCreateSerializer, OrderListSerializer, ProfileSerializer)
 from .models import Gallery, Show, Ticket, Order
 from django.utils import timezone
 from rest_framework import viewsets, status
@@ -9,6 +9,7 @@ from rest_framework import permissions, generics, views
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.db.models import Prefetch
+from .send_mail import SendMail
 
 User = get_user_model()
 
@@ -52,6 +53,7 @@ class RegisterViewsSet(views.APIView):
 
 class LoginViewSet(views.APIView):
     permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -94,14 +96,26 @@ class OrderCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         ser = self.get_serializer(data=request.data, context={"request": request})
         ser.is_valid(raise_exception=True)
-        ser.save()
-        return Response(status=status.HTTP_201_CREATED)
+        order = ser.save()
+        tickets = order.tickets.select_related("type_ticket__show")
+        show = tickets.first().type_ticket.show
+        SendMail.send_email_to_client(show, tickets, order)
+        return Response({"ok":True}, status=status.HTTP_201_CREATED)
 
 
 class OrderUserView(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = OrderListSerializer
+    
     def get_queryset(self):
         user_email = self.request.user.email
         tickets = Ticket.objects.select_related("type_ticket", "type_ticket__show")
         return Order.objects.filter(email=user_email).prefetch_related(Prefetch("tickets", queryset=tickets)).order_by("-created_at")
+
+
+class ProfileView(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProfileSerializer
+    
+    def get_queryset(self):
+        return User.objects.filter(email=self.request.user.email)

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background: #000;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellspacing="0"
+      cellpadding="0"
+      border="0"
+      style="background: #000"
+    >
+      <tr>
+        <td align="center" style="padding: 24px">
+          <table
+            role="presentation"
+            width="680"
+            cellspacing="0"
+            cellpadding="0"
+            border="0"
+            style="width: 680px; max-width: 680px"
+          >
+            <tr>
+              <td
+                style="
+                  font-family: Arial, Helvetica, sans-serif;
+                  color: #fff;
+                  padding: 0 0 16px 0;
+                  text-align: center;
+                "
+              >
+                <h1
+                  style="
+                    margin: 0;
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #fff;
+                  "
+                >
+                  Билет на ковчег
+                </h1>
+              </td>
+            </tr>
+            {% for t in tickets %}
+            <tr>
+              <td style="padding: 0 0 18px 0">
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellspacing="0"
+                  cellpadding="0"
+                  border="0"
+                  style="border-collapse: separate"
+                >
+                  <tr>
+                    <td
+                      valign="top"
+                      width="50%"
+                      style="width: 50%; padding: 0 10px 0 0"
+                    >
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                        style="
+                          background: #f3d9a5;
+                          border-radius: 12px;
+                          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+                        "
+                      >
+                        <tr>
+                          <td
+                            style="
+                              padding: 20px 24px;
+                              font-family: 'Courier New', Courier, monospace;
+                              color: #3a3a3a;
+                              text-transform: uppercase;
+                              line-height: 1.4;
+                              font-size: 13px;
+                              height: 200px;
+                            "
+                          >
+                            <div
+                              style="
+                                color: #553388;
+                                font-style: italic;
+                                font-weight: bold;
+                              "
+                            >
+                              НА КОВЧЕГ. ПРЕДОСТАВЛЕНИЕ СИДЯЧЕГО<br />
+                              МЕСТА (БЕЗ НОМЕРА) ГАРАНТИРУЕТСЯ.<br />
+                              БИЛЕТ НЕ ПОДЛЕЖИТ ПЕРЕПРОДАЖЕ!<br />
+                              ПО ОКОНЧАНИИ ПОТОПА БИЛЕТ СТАНОВИТСЯ<br />
+                              НЕДЕЙСТВИТЕЛЬНЫМ.<br /><br />
+                              КОВЧЕГ ОТХОДИТ РОВНО В НАСТОЯЩИЙ БИЛЕТ ДАЁТ ПРАВО
+                              ПРОЕЗДА
+                            </div>
+                            <div
+                              style="
+                                text-align: right;
+                                margin-top: 10px;
+                                font-weight: bold;
+                                color: #1b1b1b;
+                              "
+                            >
+                              {{ show.start_at|date:"d.m.Y H:i" }}
+                            </div>
+                            <table
+                              role="presentation"
+                              width="100%"
+                              cellspacing="0"
+                              cellpadding="0"
+                              border="0"
+                              style="margin-top: 12px"
+                            >
+                              <tr>
+                                <td
+                                  style="
+                                    border-top: 2px dashed #3a3a3a;
+                                    line-height: 0;
+                                    font-size: 0;
+                                  "
+                                >
+                                  &nbsp;
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td
+                      valign="top"
+                      width="50%"
+                      style="width: 50%; padding: 0 0 0 10px"
+                    >
+                      <table
+                        role="presentation"
+                        width="100%"
+                        cellspacing="0"
+                        cellpadding="0"
+                        border="0"
+                        style="
+                          background: #f3d9a5;
+                          border-radius: 12px;
+                          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+                        "
+                      >
+                        <tr>
+                          <td
+                            style="
+                              padding: 20px 24px;
+                              font-family: 'Courier New', Courier, monospace;
+                              color: #3a3a3a;
+                              text-transform: uppercase;
+                              height: 200px;
+                            "
+                          >
+                            <h2
+                              style="
+                                margin: 0 0 8px 0;
+                                font-size: 20px;
+                                color: #3a3a3a;
+                              "
+                            >
+                              {{ show.title }}
+                            </h2>
+                            <h3
+                              style="
+                                margin: 0 0 12px 0;
+                                font-size: 16px;
+                                color: #3a3a3a;
+                              "
+                            >
+                              {{ t.type_ticket.type_ticket }}
+                            </h3>
+                            <div
+                              style="
+                                color: #553388;
+                                font-style: italic;
+                                font-weight: bold;
+                                font-size: 18px;
+                              "
+                            >
+                              Ряд: {{ t.row }} Место: {{ t.place}}
+                            </div>
+                            <div
+                              style="
+                                color: #553388;
+                                font-style: italic;
+                                font-weight: bold;
+                                font-size: 16px;
+                              "
+                            >
+                              Цена: {{ t.type_ticket.price }} Kč
+                            </div>
+                            <div
+                              style="
+                                margin-top: 12px;
+                                font-size: 16px;
+                                font-style: italic;
+                                font-weight: bold;
+                                color: #553388;
+                                text-transform: none;
+                              "
+                            >
+                              Город: {{ show.city }}<br />
+                              Адрес: {{ show.adress }}
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td
+                style="
+                  font-family: Arial, Helvetica, sans-serif;
+                  color: #9b9b9b;
+                  font-size: 12px;
+                  text-align: center;
+                  padding: 8px 0 0 0;
+                "
+              >
+                Это автоматическое письмо. Пожалуйста, не отвечайте на него.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
