@@ -37,13 +37,14 @@ class RegisterViewsSet(views.APIView):
         serializer = RegisterUserSerializer(data = request.data)
         if serializer.is_valid():
             user = serializer.save()
+            Token.objects.filter(user=user).delete()
             login(request, user)
             token = Token.objects.create(user=user)
             response = Response(status=status.HTTP_201_CREATED)
             response.set_cookie(
                 key="auth_token",
                 value=token.key,
-                httponly=True,
+                httponly=False,
                 samesite="Lax",
                 secure=False
             )
@@ -70,7 +71,7 @@ class LoginViewSet(views.APIView):
         response.set_cookie(
                 key="auth_token",
                 value=token.key,
-                httponly=True,
+                httponly=False,
                 samesite="Lax",
                 secure=False
             )
